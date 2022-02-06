@@ -2,9 +2,6 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
 import flixel.util.FlxColor;
-#if android
-import flixel.FlxCamera;
-#end
 
 using StringTools;
 
@@ -31,10 +28,14 @@ class ResetScoreSubState extends MusicBeatSubstate
 		super();
 
 		var name:String = song;
-		if(week > -1) {
-			name = WeekData.weeksLoaded.get(WeekData.weeksList[week]).weekName;
+		if(week != -1) {
+			name = 'Week ' + WeekData.getWeekNumber(week);
+			var leName:String = WeekData.weekResetName[week];
+			if(leName != null) {
+				name = leName;
+			}
 		}
-		name += ' (' + CoolUtil.difficulties[difficulty] + ')?';
+		name += ' (' + CoolUtil.difficultyStuff[difficulty][0] + ')?';
 
 		bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		bg.alpha = 0;
@@ -71,15 +72,6 @@ class ResetScoreSubState extends MusicBeatSubstate
 		noText.x += 200;
 		add(noText);
 		updateOptions();
-
-                #if android
-		addVirtualPad(LEFT_RIGHT, A_B);
-		
-		var camcontrol = new FlxCamera();
-		FlxG.cameras.add(camcontrol);
-		camcontrol.bgColor.alpha = 0;
-		_virtualpad.cameras = [camcontrol];
-		#end
 	}
 
 	override function update(elapsed:Float)
@@ -100,25 +92,17 @@ class ResetScoreSubState extends MusicBeatSubstate
 		}
 		if(controls.BACK) {
 			FlxG.sound.play(Paths.sound('cancelMenu'), 1);
-			#if android
-			MusicBeatState.resetState();
-			#else
 			close();
-			#end
 		} else if(controls.ACCEPT) {
 			if(onYes) {
 				if(week == -1) {
 					Highscore.resetSong(song, difficulty);
 				} else {
-					Highscore.resetWeek(WeekData.weeksList[week], difficulty);
+					Highscore.resetWeek(week, difficulty);
 				}
 			}
 			FlxG.sound.play(Paths.sound('cancelMenu'), 1);
-            #if android
-			MusicBeatState.resetState();
-			#else
 			close();
-			#end
 		}
 		super.update(elapsed);
 	}

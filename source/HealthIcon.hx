@@ -7,10 +7,14 @@ using StringTools;
 
 class HealthIcon extends FlxSprite
 {
+	public static var style:String;
 	public var sprTracker:FlxSprite;
 	private var isOldIcon:Bool = false;
 	private var isPlayer:Bool = false;
 	private var char:String = '';
+
+	// The following icons have antialiasing forced to be disabled
+	var noAntialiasing:Array<String> = ['bf-pixel', 'senpai', 'spirit', 'bf-gb', 'eli-gb'];
 
 	public function new(char:String = 'bf', isPlayer:Bool = false)
 	{
@@ -30,41 +34,53 @@ class HealthIcon extends FlxSprite
 	}
 
 	public function swapOldIcon() {
-		if(isOldIcon = !isOldIcon) changeIcon('bf-old');
-		else changeIcon('bf');
+		if (style != 'gb')
+			if(isOldIcon = !isOldIcon) changeIcon('bf-old');
+			else changeIcon('bf');
+		else
+			if(isOldIcon = !isOldIcon) changeIcon('bf-old-gb');
+			else changeIcon('bf-gb');
 	}
 
-	private var iconOffsets:Array<Float> = [0, 0];
+	public function swapGbIcon()
+	{
+		style = 'gb';
+
+		if (isPlayer)
+			if (!isOldIcon)
+				changeIcon("bf-gb");
+			else
+				changeIcon("bf-old-gb");
+		else
+			changeIcon(char + '-gb');
+	}
+
+	public function iconBacc()
+	{
+		style = 'normal';
+		if(isOldIcon = !isOldIcon) changeIcon('bf');
+		else changeIcon('bf-old');
+	}
+
 	public function changeIcon(char:String) {
 		if(this.char != char) {
-			var name:String = 'icons/' + char;
-			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
+			var name:String = 'icons/icon-' + char;
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
 			var file:Dynamic = Paths.image(name);
 
-			loadGraphic(file); //Load stupidly first for getting the file size
-			loadGraphic(file, true, Math.floor(width / 3), Math.floor(height)); //Then load it fr
-			iconOffsets[0] = (width - 150) / 3;
-			iconOffsets[1] = (width - 150) / 3;
-			iconOffsets[2] = (width - 150) / 3;
-			updateHitbox();
-
-			animation.add(char, [0, 1, 2], 0, false, isPlayer);
+			loadGraphic(file, true, 150, 150);
+			animation.add(char, [0, 1], 0, false, isPlayer);
 			animation.play(char);
 			this.char = char;
 
 			antialiasing = ClientPrefs.globalAntialiasing;
-			if(char.endsWith('-pixel')) {
-				antialiasing = false;
+			for (i in 0...noAntialiasing.length) {
+				if(char == noAntialiasing[i]) {
+					antialiasing = false;
+					break;
+				}
 			}
 		}
-	}
-
-	override function updateHitbox()
-	{
-		super.updateHitbox();
-		offset.x = iconOffsets[0];
-		offset.y = iconOffsets[1];
 	}
 
 	public function getCharacter():String {

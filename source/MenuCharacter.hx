@@ -2,26 +2,10 @@ package;
 
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
-#if MODS_ALLOWED
-import sys.io.File;
-import sys.FileSystem;
-#end
-import openfl.utils.Assets;
-import haxe.Json;
-import haxe.format.JsonParser;
-
-typedef MenuCharacterFile = {
-	var image:String;
-	var scale:Float;
-	var position:Array<Int>;
-	var idle_anim:String;
-	var confirm_anim:String;
-}
 
 class MenuCharacter extends FlxSprite
 {
 	public var character:String;
-	private static var DEFAULT_CHARACTER:String = 'bf';
 
 	public function new(x:Float, character:String = 'bf')
 	{
@@ -31,55 +15,74 @@ class MenuCharacter extends FlxSprite
 	}
 
 	public function changeCharacter(?character:String = 'bf') {
-		if(character == null) character = '';
 		if(character == this.character) return;
-
+	
 		this.character = character;
 		antialiasing = ClientPrefs.globalAntialiasing;
-		visible = true;
 
-		var dontPlayAnim:Bool = false;
-		scale.set(1, 1);
+		switch(character) {
+			case 'bf':
+				frames = Paths.getSparrowAtlas('menucharacters/Menu_BF');
+				animation.addByPrefix('idle', "M BF Idle", 24);
+				animation.addByPrefix('confirm', 'M bf HEY', 24, false);
+
+			case 'gf':
+				frames = Paths.getSparrowAtlas('menucharacters/Menu_GF');
+				animation.addByPrefix('idle', "M GF Idle", 24);
+
+			case 'dad':
+				frames = Paths.getSparrowAtlas('menucharacters/Menu_Dad');
+				animation.addByPrefix('idle', "M Dad Idle", 24);
+
+			case 'spooky':
+				frames = Paths.getSparrowAtlas('menucharacters/Menu_Spooky_Kids');
+				animation.addByPrefix('idle', "M Spooky Kids Idle", 24);
+
+			case 'pico':
+				frames = Paths.getSparrowAtlas('menucharacters/Menu_Pico');
+				animation.addByPrefix('idle', "M Pico Idle", 24);
+
+			case 'mom':
+				frames = Paths.getSparrowAtlas('menucharacters/Menu_Mom');
+				animation.addByPrefix('idle', "M Mom Idle", 24);
+
+			case 'parents-christmas':
+				frames = Paths.getSparrowAtlas('menucharacters/Menu_Parents');
+				animation.addByPrefix('idle', "M Parents Idle", 24);
+
+			case 'senpai':
+				frames = Paths.getSparrowAtlas('menucharacters/Menu_Senpai');
+				animation.addByPrefix('idle', "M Senpai Idle", 24);
+			default:
+				frames = Paths.getSparrowAtlas('menucharacters/Menu_');
+				animation.addByPrefix('idle', "M BF Idle", 24);
+				animation.addByPrefix('confirm', 'M bf HEY', 24, false);
+		}
+		if (character != "")
+			animation.play('idle');
 		updateHitbox();
 
 		switch(character) {
-			case '':
-				visible = false;
-				dontPlayAnim = true;
-			default:
-				var characterPath:String = 'images/menucharacters/' + character + '.json';
-				var rawJson = null;
+			case 'bf':
+				offset.set(15, -40);
 
-				#if MODS_ALLOWED
-				var path:String = Paths.modFolders(characterPath);
-				if (!FileSystem.exists(path)) {
-					path = Main.getDataPath() + Paths.getPreloadPath(characterPath);
-				}
+			case 'gf':
+				offset.set(0, -25);
 
-				if(!FileSystem.exists(path)) {
-					path = Main.getDataPath() + Paths.getPreloadPath('images/menucharacters/' + DEFAULT_CHARACTER + '.json');
-				}
-				rawJson = File.getContent(path);
+			case 'spooky':
+				offset.set(0, -80);
 
-				#else
-				var path:String = Paths.getPreloadPath(characterPath);
-				if(!Assets.exists(path)) {
-					path = Paths.getPreloadPath('images/menucharacters/' + DEFAULT_CHARACTER + '.json');
-				}
-				rawJson = Assets.getText(path);
-				#end
-				
-				var charFile:MenuCharacterFile = cast Json.parse(rawJson);
-				frames = Paths.getSparrowAtlas('menucharacters/' + charFile.image);
-				animation.addByPrefix('idle', charFile.idle_anim, 24);
-				animation.addByPrefix('confirm', charFile.confirm_anim, 24, false);
+			case 'pico':
+				offset.set(0, -120);
 
-				if(charFile.scale != 1) {
-					scale.set(charFile.scale, charFile.scale);
-					updateHitbox();
-				}
-				offset.set(charFile.position[0], charFile.position[1]);
-				animation.play('idle');
+			case 'mom':
+				offset.set(0, 10);
+
+			case 'parents-christmas':
+				offset.set(110, 10);
+
+			case 'senpai':
+				offset.set(60, -70);
 		}
 	}
 }

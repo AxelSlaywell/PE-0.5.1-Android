@@ -3,20 +3,23 @@ package;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
 
-class MenuItem extends FlxSprite
+class MenuItem extends FlxSpriteGroup
 {
 	public var targetY:Float = 0;
+	public var week:FlxSprite;
 	public var flashingInt:Int = 0;
 
-	public function new(x:Float, y:Float, weekName:String = '')
+	public function new(x:Float, y:Float, weekNum:Int = 0)
 	{
 		super(x, y);
-		loadGraphic(Paths.image('storymenu/' + weekName));
+		week = new FlxSprite().loadGraphic(Paths.image('storymenu/week' + WeekData.getWeekNumber(weekNum)));
 		//trace('Test added: ' + WeekData.getWeekNumber(weekNum) + ' (' + weekNum + ')');
-		antialiasing = ClientPrefs.globalAntialiasing;
+		week.antialiasing = ClientPrefs.globalAntialiasing;
+		add(week);
 	}
 
 	private var isFlashing:Bool = false;
@@ -41,8 +44,8 @@ class MenuItem extends FlxSprite
 			flashingInt += 1;
 
 		if (flashingInt % fakeFramerate >= Math.floor(fakeFramerate / 2))
-			color = 0xFF33ffff;
+			week.color = 0xFF33ffff;
 		else
-			color = FlxColor.WHITE;
+			week.color = FlxColor.WHITE;
 	}
 }
